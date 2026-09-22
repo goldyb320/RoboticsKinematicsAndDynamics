@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What is v? Twists, screws, and the exponential map on SE(3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+:root{
+  --paper:#F6F8FA; --panel:#FFFFFF; --ink:#18212C; --muted:#56606E; --faint:#8A94A3;
+  --rule:#D9DFE6; --grid:#E7EBF0;
+  --axis:#D0492A; --q:#6A5ACD; --body:#138A72; --bodyfill:#A8E3D3; --pitch:#B7791F; --v:#2B6CB0;
+  --serif:"Source Serif 4",Georgia,serif; --sans:"IBM Plex Sans",system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{--paper:#11161C;--panel:#171E26;--ink:#E4E9EF;--muted:#A3ADBA;--faint:#6F7A88;--rule:#2A333E;--grid:#1F2731;
+  --axis:#F0724F;--q:#9D90F0;--body:#34C3A0;--bodyfill:#1E5C4E;--pitch:#E0A64A;--v:#63A4EC;}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.72 var(--serif)}
+main{max-width:760px;margin:0 auto;padding:56px 24px 96px}
+h1,h2,h3{font-family:var(--sans);line-height:1.25;letter-spacing:-0.01em}
+h1{font-size:34px;font-weight:600;margin:0 0 10px}
+h2{font-size:24px;font-weight:600;margin:64px 0 12px;padding-top:20px;border-top:1px solid var(--rule)}
+h3{font-size:18px;font-weight:600;margin:32px 0 6px}
+p{margin:0 0 16px}
+a{color:var(--v)}
+.lede{font-size:20px;color:var(--muted);margin-bottom:28px}
+.hero-eq{font-size:30px;margin:28px 0 8px;overflow-x:auto}
+.hero-cap{font-family:var(--sans);font-size:15px;color:var(--muted);margin-bottom:8px}
+.c-axis{color:var(--axis)} .c-q{color:var(--q)} .c-pitch{color:var(--pitch)} .c-v{color:var(--v)} .c-body{color:var(--body)}
+nav.toc{font-family:var(--sans);font-size:15px;margin:36px 0 0;padding:16px 20px;border:1px solid var(--rule);border-radius:10px;background:var(--panel)}
+nav.toc ol{margin:6px 0 0;padding-left:22px;columns:2;column-gap:32px}
+nav.toc a{color:var(--ink);text-decoration:none}
+nav.toc a:hover{color:var(--v);text-decoration:underline}
+.summary{background:var(--panel);border-left:3px solid var(--v);padding:14px 20px;margin:20px 0 24px;font-size:17px}
+.summary strong{font-family:var(--sans);font-size:14px;font-weight:600;display:block;color:var(--v);margin-bottom:2px}
+dl.terms{margin:12px 0 0}
+dl.terms dt{font-family:var(--sans);font-weight:600;font-size:16px;margin-top:18px}
+dl.terms dd{margin:2px 0 0 0;padding-left:16px;border-left:1px solid var(--rule)}
+ul,ol{padding-left:24px;margin:0 0 16px}
+li{margin-bottom:6px}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:4px 0}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:15px;margin:12px 0 20px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600}
+.tool{background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:18px 18px 14px;margin:24px -18px 28px;font-family:var(--sans)}
+.tool svg{display:block;width:100%;height:auto;touch-action:none;user-select:none}
+.tool .ts{font:12px var(--sans);fill:var(--muted)}
+.ctl{display:flex;align-items:center;gap:12px;margin:8px 0;font-size:14px;color:var(--muted)}
+.ctl label{min-width:74px}
+.ctl input[type=range]{flex:1;accent-color:var(--v)}
+.ctl .out{min-width:48px;text-align:right;color:var(--ink);font-weight:500}
+.readout{font-family:var(--mono);font-size:13px;color:var(--muted);line-height:1.8;margin-top:8px;overflow-x:auto;white-space:nowrap}
+.hint{font-size:13px;color:var(--faint);margin-top:6px}
+button{font:500 13px var(--sans);color:var(--ink);background:transparent;border:1px solid var(--rule);border-radius:8px;padding:5px 12px;cursor:pointer}
+button:hover{border-color:var(--faint)}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--v);outline-offset:2px}
+button.on{background:var(--v);border-color:var(--v);color:#fff}
+.steps{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.cap{font-size:15px;color:var(--ink);min-height:26px;margin-bottom:4px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin-top:4px}
+.legend span::before{content:"";display:inline-block;width:12px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle;background:currentColor}
+.legend span{color:var(--muted)}
+.legend .l-axis::before{background:var(--axis)} .legend .l-q::before{background:var(--q)} .legend .l-body::before{background:var(--body)}
+.legend .l-pitch::before{background:var(--pitch)} .legend .l-v::before{background:var(--v)} .legend .l-field::before{background:var(--faint)}
+footer{font-family:var(--sans);font-size:14px;color:var(--faint);margin-top:72px;border-top:1px solid var(--rule);padding-top:16px}
+@media (max-width:640px){body{font-size:17px}h1{font-size:28px}.hero-eq{font-size:22px}nav.toc ol{columns:1}.tool{margin-left:-8px;margin-right:-8px;padding:14px 12px}}
+</style>
+</head>
+<body>
+<main>
+
+<h1>What is v?</h1>
+<p class="lede">Twists, screw motions, and the exponential map on SE(3). A study guide to accompany ROB 510 Lecture 7, with two interactive tools.</p>
+
+<div class="hero-eq">$$\color{#2B6CB0}{v} \;=\; -\,{\color{#D0492A}\omega}\times{\color{#6A5ACD}q} \;+\; {\color{#B7791F}h}\,{\color{#D0492A}\omega}$$</div>
+<p class="hero-cap">v is the velocity of the point at the origin, as if the rigid motion grabbed all of space. It encodes where the screw axis is (through q) and how much it slides along that axis (h).</p>
+
+<nav class="toc" aria-label="Contents">
+<strong>Contents</strong>
+<ol>
+<li><a href="#short">The short answer</a></li>
+<li><a href="#terms">Terms</a></li>
+<li><a href="#field">No single velocity</a></li>
+<li><a href="#origin">Why the origin</a></li>
+<li><a href="#screw">Screw motions</a></li>
+<li><a href="#lecture">Connecting to Lecture 7</a></li>
+<li><a href="#why">Why we care</a></li>
+<li><a href="#depends">What v depends on</a></li>
+<li><a href="#ref">Quick reference</a></li>
+</ol>
+</nav>
+
+<h2 id="short">1. The short answer</h2>
+<p>A twist is written $\xi = (v, \omega) \in \mathbb{R}^6$. The part $\omega$ is easy to picture: it is the direction of the rotation axis, and for a unit vector, the spin rate is 1. The part $v$ is the confusing one, because it is easy to read it as "the velocity of the body" or "the velocity along the axis." It is neither.</p>
+<p><strong>v is the velocity of whatever point of the moving body happens to be passing through the origin of the reference frame.</strong> Imagine the rigid body extended to fill all of space, like a clear plastic sheet glued to it. As the body moves, the whole sheet moves with it, and some bit of the sheet is over the origin. $v$ is that bit's velocity.</p>
+<div class="summary"><strong>Summary</strong>ω says how the body spins. v says how the origin moves. Together they encode where the spin axis is ($q = \omega\times v$) and how much it slides along that axis ($h = \omega^T v$).</div>
+
+<h2 id="terms">2. Terms</h2>
+<p>Everything below assumes $\|\omega\| = 1$ whenever $\omega \neq 0$, which matches the lecture.</p>
+<dl class="terms">
+<dt>Rigid body motion, SE(3)</dt>
+<dd>A motion that preserves distances and handedness. It is written $g = (R, p)$, with rotation $R \in SO(3)$ and translation $p \in \mathbb{R}^3$, or as the $4\times4$ matrix $\bar g = \begin{bmatrix} R & p \\ 0 & 1\end{bmatrix}$.</dd>
+<dt>Screw motion</dt>
+<dd>Rotating about a line while sliding along that same line, like a bolt being turned. Chasles' theorem (Prop 2.9 in the lecture) says every rigid motion can be written as a screw motion.</dd>
+<dt><span class="c-axis">ω</span>, axis direction</dt>
+<dd>A unit vector giving the direction the screw axis points. It tells you which way the line points, not where the line is.</dd>
+<dt><span class="c-q">q</span>, a point on the axis</dt>
+<dd>Any point the axis passes through. Together, $\omega$ and $q$ fix the axis in space: a line is a direction plus a point. The most useful choice is the point on the axis closest to the origin, which makes $q \perp \omega$.</dd>
+<dt>θ, magnitude</dt>
+<dd>How far you rotate about the axis, in radians. For a pure translation, it is the distance moved instead.</dd>
+<dt><span class="c-pitch">h</span>, pitch</dt>
+<dd>How far you slide along the axis per radian of rotation. The total slide is $h\theta$. With $h = 0$ you get a pure rotation, like a hinge. With $h\to\infty$ you get pure translation.</dd>
+<dt><span class="c-v">v</span></dt>
+<dd>The velocity of the point at the origin, which is $v = -\omega\times q + h\omega$. It packs the axis location and the pitch into three numbers measured from the origin.</dd>
+<dt>Twist $\xi = (v,\omega)$</dt>
+<dd>Six numbers that describe an entire screw (axis plus pitch) in a form that works with linear algebra.</dd>
+<dt>$\hat\xi$ ("xi hat"), se(3)</dt>
+<dd>The $4\times4$ matrix form of a twist: $\hat\xi = \begin{bmatrix}\hat\omega & v\\ 0 & 0\end{bmatrix}$, where $\hat\omega$ is the skew-symmetric matrix with $\hat\omega\, x = \omega\times x$. The set of these matrices is se(3).</dd>
+<dt>Exponential map</dt>
+<dd>$\exp(\hat\xi\theta)$ turns a twist and a magnitude into an actual rigid motion $g \in SE(3)$. The pair $\xi\theta \in \mathbb{R}^6$ is called the exponential coordinates of $g$.</dd>
+<dt>$v_\perp$ and $v_\parallel$</dt>
+<dd>The two pieces of $v$. The perpendicular part $v_\perp = -\omega\times q$ comes from the axis being off the origin. The parallel part $v_\parallel = h\omega$ comes from sliding along the axis.</dd>
+</dl>
+
+<h2 id="field">3. A rotating body has no single velocity</h2>
+<p>Think of a spinning wheel. Points on the rim move fast, points near the hub move slowly, and the center doesn't move at all. Points on opposite sides of the rim move in opposite directions. If someone asks "what is the wheel's velocity?", there is no single answer. You have to say which point you mean.</p>
+<p>A rigid body therefore has a <em>velocity field</em>: every point $r$ has its own velocity. Rigidity makes this field very constrained. It is completely determined by two things:</p>
+$$\text{velocity}(r) \;=\; v + \omega\times r$$
+<p>This works just like a line $y = mx + b$. The slope plus the value at one agreed spot pins down the entire line. Here $\omega$ plays the role of the slope (how velocity changes as you move around) and $v$ plays the role of the intercept (the velocity at $r = 0$). Plug in $r = 0$ and you get exactly $v$.</p>
+<p>For a pure rotation about an axis through $q$, a point at $r$ moves with velocity $\omega\times(r - q)$. At the origin this gives $v = -\omega\times q$.</p>
+
+<div class="tool" id="fieldTool">
+<svg id="f-sv" viewBox="0 0 680 440" role="img" aria-labelledby="f-title">
+<title id="f-title">Top-down view of a body rotating about an axis parallel to z. Gray arrows show the velocity field. The blue arrow at the origin is v.</title>
+<defs><marker id="f-ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M1 1L9 5L1 9z" fill="context-stroke"/></marker></defs>
+<g id="f-grid"></g><g id="f-field"></g><g id="f-over"></g>
+</svg>
+<div class="ctl"><label for="f-h">Pitch h</label><input type="range" id="f-h" min="-2" max="2" step="0.1" value="0"><span class="out" id="f-hout">0.0</span></div>
+<div class="readout" id="f-read"></div>
+<div class="legend"><span class="l-field">body point velocities</span><span class="l-axis">axis ω (out of screen)</span><span class="l-q">q, origin to axis</span><span class="l-v">v, velocity at origin</span></div>
+<p class="hint">Drag the coral axis. The axis points out of the screen and the rotation is counterclockwise. A dot at the origin means v has an out-of-screen part (h &gt; 0), and a cross means into the screen.</p>
+</div>
+
+<h3>Things to try</h3>
+<ul>
+<li><strong>Drag the axis onto the origin.</strong> The blue arrow disappears. The origin now just spins in place, so $v = 0$ and the twist is $(0,\omega)$, a pure rotation about the origin.</li>
+<li><strong>Drag the axis far away.</strong> $v$ gets longer. The origin sits on a big circle around a distant axis, so it moves fast. $\|v_\perp\|$ equals the distance from the origin to the axis.</li>
+<li><strong>Look at the direction of v.</strong> It is always perpendicular to the line from the origin to the axis, tangent to the circle the origin traces.</li>
+<li><strong>Check the last readout line.</strong> $\omega\times v$ always equals $q$. Given only $v$ and $\omega$, you can find where the axis is.</li>
+</ul>
+
+<h2 id="origin">4. Why "at the origin" specifically</h2>
+<p>Since the body has no single velocity, the twist must pick one point to report. It picks the origin of the reference frame. Other choices are worse:</p>
+<table>
+<tr><th>Candidate point</th><th>Why it doesn't work as well</th></tr>
+<tr><td>A point on the body (its center, say)</td><td>The twist describes a motion, not an object. The same screw could carry a teacup or a robot link, and those have different centers. The origin belongs to the frame, so it exists whatever body you attach.</td></tr>
+<tr><td>$q$, a point on the axis</td><td>Points on the axis barely move. Their velocity is only $h\omega$ (zero for pure rotation), which says nothing about where the axis is. And $q$ isn't unique, since any point on the axis would do.</td></tr>
+<tr><td>The origin</td><td>It is shared by everything expressed in the frame, and its velocity $-\omega\times q + h\omega$ encodes both the axis location and the pitch.</td></tr>
+</table>
+
+<h3>"How can it be at the origin if the body isn't there?"</h3>
+<p>Picture the motion as grabbing all of space, not just the object. The imagined point at the origin isn't physical when the body is elsewhere, but it follows exactly the same rule, $\text{velocity}(r) = v + \omega \times r$, as every real point on the body. For any real point you care about, such as a gripper tip, you plug its position into that formula.</p>
+
+<h3>Worked example</h3>
+<p>Take the axis at $q = (2,0,0)$, pointing up ($\omega = \hat z$), spinning at 1 rad/s counterclockwise, with $h = 0$. The origin is 2 units to the left of the axis, so the point there is on a circle of radius 2 and moves at speed 2. Going counterclockwise around a center to your right means moving in $-y$. So $v = (0,-2,0)$. The formula agrees:</p>
+$$v = -\omega\times q = -(\hat z \times 2\hat x) = -2\hat y = (0,-2,0).$$
+
+<div class="summary"><strong>Summary</strong>v is the intercept of the body's velocity field, taken at the one point every frame agrees on. Moving the origin changes v, just as shifting where x = 0 is changes a line's intercept, even though the motion itself hasn't changed.</div>
+
+<h2 id="screw">5. Screw motions: putting the pieces together</h2>
+<p>To describe a specific screw, you answer four questions: which way does the line point ($\omega$), where is the line ($q$), how far do you slide per turn ($h$), and how much do you turn ($\theta$). The twist packs the first three into six numbers:</p>
+$$\xi = (v,\omega), \qquad v = \underbrace{-\omega\times q}_{v_\perp:\ \text{axis offset}} + \underbrace{h\omega}_{v_\parallel:\ \text{slide}}$$
+<p>θ is kept separate as "how much." That separation matters a lot later.</p>
+
+<div class="tool" id="screwTool">
+<div class="steps" id="s-steps"></div>
+<div class="cap" id="s-cap"></div>
+<svg id="s-sv" viewBox="0 0 680 420" role="img" aria-labelledby="s-title">
+<title id="s-title">Isometric 3D view of a rigid triangle undergoing a screw motion about a vertical axis, with the twist's v drawn at the origin.</title>
+<defs><marker id="s-ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M1 1L9 5L1 9z" fill="context-stroke"/></marker></defs>
+<g id="s-scene"></g>
+</svg>
+<div class="ctl"><label for="s-th">θ (turn)</label><input type="range" id="s-th" min="0" max="360" step="1" value="120"><span class="out" id="s-tho">120°</span><button id="s-play" aria-label="Play animation">Play</button></div>
+<div class="ctl"><label for="s-h">h (pitch)</label><input type="range" id="s-h" min="0" max="0.6" step="0.05" value="0.3"><span class="out" id="s-ho">0.30</span></div>
+<div class="ctl"><label for="s-d">axis at q</label><input type="range" id="s-d" min="0" max="3" step="0.25" value="2"><span class="out" id="s-do">2.00</span></div>
+<div class="readout" id="s-read"></div>
+<div class="legend"><span class="l-axis">axis ω</span><span class="l-q">q</span><span class="l-body">rigid body and its path</span><span class="l-pitch">slide hθ</span><span class="l-v">v and its two parts</span></div>
+</div>
+
+<h3>Things to try</h3>
+<ul>
+<li><strong>Set h to 0.</strong> The triangle swings in a flat circle, like a revolute joint. $v$ has no $z$ part, so $v = -\omega\times q$.</li>
+<li><strong>Slide "axis at q" to 0.</strong> The horizontal part of $v$ disappears and only $h\omega$ remains. The motion looks the same, but it is now described from an origin on the axis.</li>
+<li><strong>Watch v while changing θ.</strong> $v$ doesn't change. v describes the axis and pitch; it is not the motion itself.</li>
+</ul>
+
+<h3>Running it backwards: recovering the screw from the twist</h3>
+<p>Given only $(v,\omega)$ with $\|\omega\| = 1$, you can recover everything:</p>
+<ul>
+<li><strong>Pitch:</strong> $h = \omega^T v$. Since $\omega\times q \perp \omega$, only the $h\omega$ part survives the dot product.</li>
+<li><strong>Axis location:</strong> $q = \omega\times v$, the point on the axis closest to the origin. To check: with $q\perp\omega$, $\omega\times v = -\omega\times(\omega\times q) = -\big(\omega(\omega^Tq) - q\big) = q$.</li>
+</ul>
+
+<h2 id="lecture">6. Connecting to Lecture 7</h2>
+
+<h3>Prop 2.8: exp maps se(3) into SE(3)</h3>
+<p><strong>Case 1, $\omega = 0$ (pure translation).</strong> $\hat\xi^2 = 0$, so the series stops after two terms:</p>
+$$\exp(\hat\xi\theta) = \begin{bmatrix} I & v\theta\\ 0 & 1\end{bmatrix}.$$
+<p>Here $v$ is simply the direction of travel, and $\theta$ is the distance.</p>
+
+<p><strong>Case 2, $\omega\neq0$.</strong> The trick is to change coordinates so the origin sits on the axis. The lecture defines</p>
+$$g = \begin{bmatrix} I & \omega\times v\\ 0 & 1\end{bmatrix}.$$
+<p>From section 5, $\omega\times v = q$, the closest point on the axis. So $g$ moves the reference frame onto the axis. In that frame, the twist becomes</p>
+$$\hat\xi' = g^{-1}\hat\xi g = \begin{bmatrix}\hat\omega & \omega\omega^Tv\\ 0 & 0\end{bmatrix} = \begin{bmatrix}\hat\omega & h\omega\\ 0&0\end{bmatrix}.$$
+<p>Once the origin is on the axis, $v_\perp$ disappears and only the slide $h\omega$ remains. This is the "moving the origin changes v" idea used as a tool. Because $\hat\omega(h\omega) = h\,\omega\times\omega = 0$, the powers are simple, and</p>
+$$\exp(\hat\xi'\theta) = \begin{bmatrix} e^{\hat\omega\theta} & h\omega\theta\\ 0&1\end{bmatrix}:$$
+<p>rotate about the axis, and slide $h\theta$ along it. Transforming back with $\exp(\hat\xi\theta) = g\,\exp(\hat\xi'\theta)\,g^{-1}$ gives</p>
+$$\exp(\hat\xi\theta) = \begin{bmatrix} e^{\hat\omega\theta} & (I - e^{\hat\omega\theta})(\omega\times v) + \omega\omega^Tv\,\theta\\ 0 & 1\end{bmatrix}.$$
+<p>You can read the top-right block directly: $(I - e^{\hat\omega\theta})\,q$ accounts for rotating about an axis through $q$ instead of the origin, and $h\omega\theta$ is the slide along the axis.</p>
+
+<h3>Prop 2.9: exp is onto SE(3)</h3>
+<p>Every $g = (R,p)$ comes from some twist. If $R = I$, use a pure translation with $v = p/\|p\|$ and $\theta = \|p\|$. If $R\neq I$, first solve $e^{\hat\omega\theta} = R$ for $\omega,\theta$ (Prop 2.5), then solve $Av = p$ with</p>
+$$A = (I - e^{\hat\omega\theta})\hat\omega + \omega\omega^T\theta.$$
+<p>$A$ is invertible for $\theta\neq0$, because its two parts have mutually orthogonal null spaces. So $v = A^{-1}p$. This is Chasles' theorem: every rigid motion is a screw.</p>
+
+<h3>Many-to-one</h3>
+<p>exp on se(3) is not injective, because exp on so(3) wasn't: $\theta$ and $\theta + 2\pi$ give the same rotation, for example.</p>
+
+<h3>"Can we find q with v = −ω × q? No, for 3D"</h3>
+<p>A cross product with $\omega$ is always perpendicular to $\omega$. So $-\omega\times q$ can only produce $v_\perp$. Any twist with $h = \omega^Tv \neq 0$ has a part along the axis that no choice of $q$ can create. That's why a general twist needs the extra $h\omega$ term. In 2D, $\omega$ always points out of the plane and $v$ always lies in it, so $h = 0$ automatically and the answer is yes.</p>
+
+<h2 id="why">7. Why we care</h2>
+<h3>Every rigid motion is a screw</h3>
+<p>Prop 2.9 means one object, a twist plus a magnitude, describes every possible rigid displacement, however complicated.</p>
+
+<h3>Robot joints are twists</h3>
+<p>Each joint on a robot arm is a screw with a fixed axis:</p>
+<table>
+<tr><th>Joint</th><th>ω</th><th>v</th><th>θ</th></tr>
+<tr><td>Revolute (hinge)</td><td>joint axis direction</td><td>$-\omega\times q$, with $q$ any point on the joint axis ($h = 0$)</td><td>joint angle</td></tr>
+<tr><td>Prismatic (slider)</td><td>$0$</td><td>unit direction of sliding</td><td>extension</td></tr>
+</table>
+<p>This is where separating $v$ from $\theta$ pays off. <strong>The twist is fixed by the robot's geometry, and only θ changes as the robot moves.</strong> You read off each joint's $\omega$ and $q$ once, in the home pose. Then the end-effector pose for any joint values is the product-of-exponentials formula:</p>
+$$g(\theta_1,\dots,\theta_n) = e^{\hat\xi_1\theta_1}\,e^{\hat\xi_2\theta_2}\cdots e^{\hat\xi_n\theta_n}\,g(0).$$
+<p>For this to work, every twist must be written in the same frame, usually the base frame. All the $v$'s are measured from the same origin, so they compose correctly. The Lecture 7 formula for $\exp(\hat\xi\theta)$ is the building block you plug into it.</p>
+
+<h3>Later: v becomes a literal velocity</h3>
+<p>With Jacobians and velocities, a twist times $\dot\theta$ is the body's velocity. At that point "the velocity of the point at the origin" is exactly what $v$ measures, rather than just a way to picture it.</p>
+
+<h2 id="depends">8. What v depends on, and what it doesn't</h2>
+<p>$v = -\omega\times q + h\omega$ depends on exactly three things:</p>
+<ol>
+<li><strong>ω</strong>, the axis direction (and the spin rate if $\omega$ isn't unit length).</li>
+<li><strong>Where the axis is relative to the origin</strong>, both distance and direction. The magnitude of $-\omega\times q$ is the distance from the origin to the axis. Its direction is perpendicular to both the axis and the line from the origin to the axis.</li>
+<li><strong>h</strong>, which adds the part $h\omega$ along the axis.</li>
+</ol>
+<p>It does <em>not</em> depend on θ, on what the body is, or on where the body currently is.</p>
+
+<h3>Common misreadings</h3>
+<table>
+<tr><th>Misreading</th><th>Correction</th></tr>
+<tr><td>"v is the velocity of the body."</td><td>A rotating body has no single velocity. v is the velocity at one point, the origin.</td></tr>
+<tr><td>"v is the velocity along the axis."</td><td>Only the part $h\omega$ is along the axis. The rest, $-\omega\times q$, comes from the axis being offset from the origin.</td></tr>
+<tr><td>"v depends on how far <em>we</em> are from the origin."</td><td>The origin is fixed. v depends on how far the <em>axis</em> is from the origin.</td></tr>
+<tr><td>"v stays the same after a change of frame."</td><td>Moving the origin changes v. The similarity transform $g^{-1}\hat\xi g$ re-expresses the same twist from a new origin.</td></tr>
+</table>
+
+<h2 id="ref">9. Quick reference</h2>
+<table>
+<tr><th>Quantity</th><th>Formula</th><th>Meaning</th></tr>
+<tr><td>Twist</td><td>$\xi = (v,\omega)$</td><td>Screw axis and pitch, as six numbers</td></tr>
+<tr><td>Hat form</td><td>$\hat\xi = \begin{bmatrix}\hat\omega & v\\0&0\end{bmatrix}$</td><td>Matrix version in se(3)</td></tr>
+<tr><td>v from the screw</td><td>$v = -\omega\times q + h\omega$</td><td>Velocity of the point at the origin</td></tr>
+<tr><td>Velocity field</td><td>$\text{vel}(r) = v + \omega\times r$</td><td>Velocity of any point $r$</td></tr>
+<tr><td>Pitch</td><td>$h = \omega^Tv$</td><td>Slide per radian</td></tr>
+<tr><td>Closest axis point</td><td>$q = \omega\times v$</td><td>Where the axis is</td></tr>
+<tr><td>Pure translation</td><td>$\omega = 0$</td><td>$\exp(\hat\xi\theta) = \begin{bmatrix}I & v\theta\\0&1\end{bmatrix}$</td></tr>
+<tr><td>General case</td><td>$\omega\ne0$</td><td>$\begin{bmatrix}e^{\hat\omega\theta} & (I-e^{\hat\omega\theta})(\omega\times v)+\omega\omega^Tv\theta\\0&1\end{bmatrix}$</td></tr>
+<tr><td>Revolute joint</td><td>$\xi = (-\omega\times q,\ \omega)$</td><td>$h = 0$</td></tr>
+<tr><td>Prismatic joint</td><td>$\xi = (v,\ 0)$</td><td>Slide along $v$</td></tr>
+</table>
+<div class="summary"><strong>One line to remember</strong>ω and q say where the screw axis is, h says how much it slides per turn, and θ says how much it turns. v is the compact way of storing q and h, measured from the origin, so everything fits in a matrix you can exponentiate.</div>
+
+<footer>Study notes for ROB 510 / EECS 567, Lecture 7: exponential map onto SE(3). Math rendered with KaTeX. The interactive tools run entirely in the browser.</footer>
+</main>
+
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  const go=()=>{ if(window.renderMathInElement){ renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],ignoredClasses:['tool'],throwOnError:false}); } else setTimeout(go,50); };
+  go();
+});
+</script>
+
+<script>
+(function(){
+const NS='http://www.w3.org/2000/svg';
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p.appendChild(e);return e;}
+
+/* ---------- Tool 1: velocity field ---------- */
+const S=40,CX=340,CY=220,K=0.35;
+let q={x:2.5,y:1.5},h=0;
+const sv=document.getElementById('f-sv');
+const px=(x,y)=>[CX+x*S,CY-y*S];
+function grid(){
+  const g=document.getElementById('f-grid');g.innerHTML='';
+  const gc=css('--grid'),rc=css('--rule');
+  for(let x=-8;x<=8;x++){const[a]=px(x,0);el('line',{x1:a,y1:10,x2:a,y2:430,stroke:gc,'stroke-width':1},g);}
+  for(let y=-5;y<=5;y++){const[,b]=px(0,y);el('line',{x1:10,y1:b,x2:670,y2:b,stroke:gc,'stroke-width':1},g);}
+  el('line',{x1:10,y1:CY,x2:670,y2:CY,stroke:rc,'stroke-width':1.2},g);
+  el('line',{x1:CX,y1:10,x2:CX,y2:430,stroke:rc,'stroke-width':1.2},g);
+  el('text',{x:655,y:CY-8,class:'ts','text-anchor':'end'},g).textContent='x';
+  el('text',{x:CX+8,y:24,class:'ts'},g).textContent='y';
+}
+function drawField(){
+  const f=document.getElementById('f-field'),o=document.getElementById('f-over');f.innerHTML='';o.innerHTML='';
+  const cA=css('--axis'),cQ=css('--q'),cV=css('--v'),cF=css('--faint'),cI=css('--ink'),cP=css('--panel');
+  for(let x=-7;x<=7;x++)for(let y=-4;y<=4;y++){
+    if(x===0&&y===0)continue;
+    const vx=-(y-q.y),vy=(x-q.x);if(Math.hypot(vx,vy)<0.05)continue;
+    const[a,b]=px(x,y),[c,d]=px(x+vx*K,y+vy*K);
+    el('line',{x1:a,y1:b,x2:c,y2:d,stroke:cF,'stroke-width':1,opacity:0.7,'marker-end':'url(#f-ah)'},f);
+  }
+  const[qx,qy]=px(q.x,q.y);
+  el('circle',{cx:qx,cy:qy,r:42,fill:'none',stroke:cA,'stroke-width':0.8,'stroke-dasharray':'4 4'},o);
+  el('path',{d:`M${qx+42} ${qy} A42 42 0 0 0 ${qx} ${qy-42}`,fill:'none',stroke:cA,'stroke-width':1.5,'marker-end':'url(#f-ah)'},o);
+  el('line',{x1:CX,y1:CY,x2:qx,y2:qy,stroke:cQ,'stroke-width':1.5,'stroke-dasharray':'5 4','marker-end':'url(#f-ah)'},o);
+  const vx=q.y,vy=-q.x;const[c,d]=px(vx*K,vy*K);
+  if(Math.hypot(vx,vy)>0.05)el('line',{x1:CX,y1:CY,x2:c,y2:d,stroke:cV,'stroke-width':3,'marker-end':'url(#f-ah)'},o);
+  el('circle',{cx:CX,cy:CY,r:4,fill:cI},o);
+  if(Math.abs(h)>0.05){
+    el('circle',{cx:CX,cy:CY,r:10,fill:'none',stroke:cV,'stroke-width':1.5},o);
+    if(h>0)el('circle',{cx:CX,cy:CY,r:3,fill:cV},o);
+    else{el('line',{x1:CX-6,y1:CY-6,x2:CX+6,y2:CY+6,stroke:cV,'stroke-width':1.5},o);el('line',{x1:CX-6,y1:CY+6,x2:CX+6,y2:CY-6,stroke:cV,'stroke-width':1.5},o);}
+  }
+  const ax=el('g',{style:'cursor:grab',tabindex:0,role:'button','aria-label':'Screw axis. Drag, or use arrow keys to move.'},o);
+  el('circle',{cx:qx,cy:qy,r:14,fill:cP,stroke:cA,'stroke-width':1.5},ax);
+  el('circle',{cx:qx,cy:qy,r:4,fill:cA},ax);
+  el('text',{x:qx+18,y:qy+24,class:'ts'},o).textContent='axis ω';
+  el('text',{x:CX-8,y:CY+20,class:'ts','text-anchor':'end'},o).textContent='origin';
+  const f1=n=>(Math.abs(n)<0.05?0:n).toFixed(1);
+  document.getElementById('f-read').innerHTML=
+   `q = (${f1(q.x)}, ${f1(q.y)}, 0) &nbsp; ω = (0, 0, 1)<br>`+
+   `v = −ω×q + hω = <span style="color:${cV}">(${f1(vx)}, ${f1(vy)}, ${f1(h)})</span><br>`+
+   `|v⊥| = ${f1(Math.hypot(vx,vy))} = distance from origin to axis &nbsp; ω×v = (${f1(q.x)}, ${f1(q.y)}, 0) = q`;
+}
+let drag=false;
+function pt(e){const p=sv.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const r=p.matrixTransform(sv.getScreenCTM().inverse());return{x:(r.x-CX)/S,y:(CY-r.y)/S};}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+sv.addEventListener('pointerdown',e=>{const p=pt(e);if(Math.hypot(p.x-q.x,p.y-q.y)<0.7){drag=true;sv.setPointerCapture(e.pointerId);e.preventDefault();}});
+sv.addEventListener('pointermove',e=>{if(!drag)return;const p=pt(e);q={x:clamp(Math.round(p.x*2)/2,-7,7),y:clamp(Math.round(p.y*2)/2,-4.5,4.5)};drawField();});
+sv.addEventListener('pointerup',()=>drag=false);
+sv.addEventListener('keydown',e=>{const m={ArrowLeft:[-0.5,0],ArrowRight:[0.5,0],ArrowUp:[0,0.5],ArrowDown:[0,-0.5]}[e.key];if(!m)return;e.preventDefault();q={x:clamp(q.x+m[0],-7,7),y:clamp(q.y+m[1],-4.5,4.5)};drawField();const a=sv.querySelector('[role=button]');a&&a.focus();});
+document.getElementById('f-h').addEventListener('input',e=>{h=+e.target.value;document.getElementById('f-hout').textContent=h.toFixed(1);drawField();});
+
+/* ---------- Tool 2: screw explorer ---------- */
+const S2=38,CX2=230,CY2=300;
+let th=120*Math.PI/180,hh=0.3,d=2,step=0,playing=false;
+const P=(x,y,z)=>[CX2+(x-y)*0.866*S2,CY2+(x+y)*0.5*S2-z*S2];
+function ln(p,a,b,col,w,extra){const[x1,y1]=P(...a),[x2,y2]=P(...b);return el('line',Object.assign({x1,y1,x2,y2,stroke:col,'stroke-width':w,'stroke-linecap':'round'},extra||{}),p);}
+function tx(p,pt,s,col,dx,dy){const[x,y]=P(...pt);const t=el('text',{x:x+(dx||0),y:y+(dy||0),class:'ts'},p);t.textContent=s;if(col)t.setAttribute('style','fill:'+col);return t;}
+const steps=[
+ ['All','Everything at once. Pick a symbol to focus on it.'],
+ ['ω','ω is the direction the axis points. It is a unit vector.'],
+ ['q','q is any point on the axis. With ω, it fixes where the line sits in space.'],
+ ['θ','θ is how far you turn about the axis, in radians.'],
+ ['h','h is how far you slide per radian. The total slide is h·θ.'],
+ ['v','v = −ω×q + hω is the velocity of the point at the origin.']];
+const sb=document.getElementById('s-steps');
+steps.forEach((s,i)=>{const b=document.createElement('button');b.textContent=s[0];b.setAttribute('aria-pressed','false');b.onclick=()=>{step=i;drawScrew();};sb.appendChild(b);});
+function rot(p,t){const x=p[0]-d,y=p[1];return[d+x*Math.cos(t)-y*Math.sin(t),x*Math.sin(t)+y*Math.cos(t),p[2]+hh*t];}
+function drawScrew(){
+  [...sb.children].forEach((b,i)=>{b.classList.toggle('on',i===step);b.setAttribute('aria-pressed',i===step);});
+  document.getElementById('s-cap').textContent=steps[step][1];
+  const cA=css('--axis'),cQ=css('--q'),cB=css('--body'),cBF=css('--bodyfill'),cH=css('--pitch'),cV=css('--v'),cG=css('--faint');
+  const sc=document.getElementById('s-scene');sc.innerHTML='';
+  const op=k=>step===0||step===k?1:0.18;
+  const base=[[d,-1.6,0],[d+0.7,-1.6,0],[d,-1.6,0.7]];
+  ln(sc,[0,0,0],[1.4,0,0],cG,1,{'marker-end':'url(#s-ah)'});ln(sc,[0,0,0],[0,1.4,0],cG,1,{'marker-end':'url(#s-ah)'});ln(sc,[0,0,0],[0,0,1.4],cG,1,{'marker-end':'url(#s-ah)'});
+  tx(sc,[1.55,0,0],'x',null,2,4);tx(sc,[0,1.55,0],'y',null,-10,4);tx(sc,[0,0,1.5],'z',null,-4,-4);
+  tx(sc,[0,0,0],'origin',null,-44,16);
+  const gw=el('g',{opacity:op(1)},sc);
+  ln(gw,[d,0,-0.8],[d,0,4.8],cA,2,{'marker-end':'url(#s-ah)'});tx(gw,[d,0,4.8],'ω',cA,8,4);
+  const gq=el('g',{opacity:op(2)},sc);
+  if(d>0.01)ln(gq,[0,0,0],[d,0,0],cQ,1.5,{'stroke-dasharray':'5 4','marker-end':'url(#s-ah)'});
+  const[qx,qy]=P(d,0,0);el('circle',{cx:qx,cy:qy,r:4,fill:cQ},gq);tx(gq,[d,0,0],'q',cQ,8,16);
+  const gb=el('g',{opacity:op(3)},sc);
+  el('polygon',{points:base.map(p=>P(...p).join(',')).join(' '),fill:'none',stroke:cB,'stroke-width':1,'stroke-dasharray':'3 3'},gb);
+  const pts=[];for(let i=0;i<=60;i++){pts.push(P(...rot(base[0],th*i/60)).join(','));}
+  el('polyline',{points:pts.join(' '),fill:'none',stroke:cB,'stroke-width':1.5},gb);
+  ln(gb,[d,0,0],base[0],cB,0.8,{'stroke-dasharray':'2 3'});
+  const cur=base.map(p=>rot(p,th));
+  ln(gb,[d,0,hh*th],cur[0],cB,0.8,{'stroke-dasharray':'2 3'});
+  el('polygon',{points:cur.map(p=>P(...p).join(',')).join(' '),fill:cBF,stroke:cB,'stroke-width':1.5,'fill-opacity':0.85},gb);
+  tx(gb,base[0],'start',cB,6,14);tx(gb,cur[2],'body after θ',cB,8,-4);
+  const gh=el('g',{opacity:op(4)},sc);
+  if(hh*th>0.02){ln(gh,[d,0,0],[d,0,hh*th],cH,4);tx(gh,[d,0,hh*th/2],'slide h·θ',cH,10,4);}
+  const gv=el('g',{opacity:op(5)},sc);const K2=0.7;
+  if(d>0.01)ln(gv,[0,0,0],[0,-d*K2,0],cV,1.5,{'stroke-dasharray':'4 3','marker-end':'url(#s-ah)'});
+  if(hh>0.01)ln(gv,[0,-d*K2,0],[0,-d*K2,hh*K2*3],cV,1.5,{'stroke-dasharray':'4 3','marker-end':'url(#s-ah)'});
+  if(d>0.01||hh>0.01){ln(gv,[0,0,0],[0,-d*K2,hh*K2*3],cV,3,{'marker-end':'url(#s-ah)'});tx(gv,[0,-d*K2,hh*K2*3],'v',cV,8,-2);}
+  const f=n=>(Math.abs(n)<0.005?0:n).toFixed(2);
+  document.getElementById('s-read').innerHTML=
+   `ω = (0, 0, 1) &nbsp; q = (${f(d)}, 0, 0) &nbsp; h = ${f(hh)} &nbsp; θ = ${f(th)} rad<br>`+
+   `v = −ω×q + hω = (0, ${f(-d)}, 0) + (0, 0, ${f(hh)}) = <span style="color:${cV}">(0, ${f(-d)}, ${f(hh)})</span><br>`+
+   `twist ξ = (v, ω) = (0, ${f(-d)}, ${f(hh)}, 0, 0, 1) &nbsp; check: ωᵀv = ${f(hh)} = h, ω×v = (${f(d)}, 0, 0) = q`;
+}
+const $=id=>document.getElementById(id);
+$('s-th').oninput=e=>{th=e.target.value*Math.PI/180;$('s-tho').textContent=e.target.value+'°';drawScrew();};
+$('s-h').oninput=e=>{hh=+e.target.value;$('s-ho').textContent=hh.toFixed(2);drawScrew();};
+$('s-d').oninput=e=>{d=+e.target.value;$('s-do').textContent=d.toFixed(2);drawScrew();};
+const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function tick(){if(!playing)return;const deg=(+$('s-th').value+2)%361;$('s-th').value=deg;th=deg*Math.PI/180;$('s-tho').textContent=deg+'°';drawScrew();requestAnimationFrame(tick);}
+$('s-play').onclick=()=>{
+  if(reduce){const deg=(+$('s-th').value+45)%361;$('s-th').value=deg;th=deg*Math.PI/180;$('s-tho').textContent=deg+'°';drawScrew();return;}
+  playing=!playing;$('s-play').textContent=playing?'Pause':'Play';$('s-play').setAttribute('aria-label',playing?'Pause animation':'Play animation');if(playing)tick();};
+
+function all(){grid();drawField();drawScrew();}
+all();
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',all);
+})();
+</script>
+</body>
+</html>
