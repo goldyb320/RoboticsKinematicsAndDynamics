@@ -2,7 +2,7 @@
  
 Study notes for ROB 510 / EECS 567, Lecture 7 (exponential map onto SE(3)), with two interactive visual tools.
  
-**Open `index.html` in a browser** to read the notes and use the tools. To host it, enable GitHub Pages for this repo (Settings → Pages → deploy from the main branch, root folder). The page will then be live at `https://<username>.github.io/<repo>/`.
+**Open `index.html` in a browser** to read the notes and use the tools. To host it, enable GitHub Pages for this repo (Settings → Pages → deploy from the main branch, root folder). The page will then be live at `https://goldyb320.github.io/RoboticsKinematicsAndDynamics/`.
  
 ## What's inside
  
