@@ -481,9 +481,8 @@ $$
 
 ### 5.4 How the formula is proven (L7, the similarity trick) ★
 
-1. Move the frame to the closest point on the axis using $g = \begin{bmatrix}I & \omega\times v\cr 0&1\end{bmatrix}$.
-2. In the new coordinates, the twist becomes $\hat\xi' = g^{-1}\hat\xi g = \begin{bmatrix}\hat\omega & h\omega\cr 0&0\end{bmatrix}$, an axis through the origin. Its exponential is easy: $\begin{bmatrix}e^{\hat\omega\theta} & h\omega\theta\cr 0&1\end{bmatrix}$.
-3. Transform back: $e^{\hat\xi\theta} = g\,e^{\hat\xi'\theta}g^{-1}$.
+1. Move the frame to the closest point on the axis using $g = [\,I \mid \omega\times v\,]$.
+2. In the new coordinates, the twist $\hat\xi' = g^{-1}\hat\xi g$ has $\hat\omega$ in the top‑left, $h\omega$ in the top‑right, and a zero bottom row: an axis through the origin. Its exponential is easy: $[\,e^{\hat\omega\theta} \mid h\omega\theta\,]$.
 
 The idea worth keeping: **$e^{g\hat\xi g^{-1}\theta} = g\,e^{\hat\xi\theta}g^{-1}$.** This identity is the whole reason the Adjoint works (Section 8).
 
