@@ -412,9 +412,9 @@ That bottom 0 marks it as a vector.
 
 | Joint / motion | Twist coordinates $\xi = (v,\omega)$ | Notes |
 |---|---|---|
-| **Revolute** (pure rotation, pitch 0) | $\begin{bmatrix}-\omega\times q\cr \omega\end{bmatrix}$, $\Vert\omega\Vert= 1$, q on the axis | the axis through the origin gives $v=0$ |
-| **Prismatic** (pure translation, pitch ∞) | $\begin{bmatrix}v\cr 0\end{bmatrix}$, $\Vert v\Vert= 1$ | **where** the slider sits doesn't matter, only its direction |
-| **Screw/helical** (pitch h) | $\begin{bmatrix}-\omega\times q + h\omega\cr \omega\end{bmatrix}$ | translate $h\theta$ along ω while rotating θ |
+| **Revolute** (pure rotation, pitch 0) | $(-\omega\times q,\ \omega)$, $\Vert\omega\Vert= 1$, q on the axis | the axis through the origin gives $v=0$ |
+| **Prismatic** (pure translation, pitch ∞) | $(v,\ 0)$, $\Vert v\Vert= 1$ | **where** the slider sits doesn't matter, only its direction |
+| **Screw/helical** (pitch h) | $(-\omega\times q + h\omega,\ \omega)$ | translate $h\theta$ along ω while rotating θ |
 
 **Fast cross products you'll use constantly** (right‑hand cyclic $x\to y\to z\to x$):
 - $z\times x = y$, $x\times y = z$, $y\times z = x$
