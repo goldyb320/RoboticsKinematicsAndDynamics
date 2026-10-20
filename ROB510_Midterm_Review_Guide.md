@@ -462,7 +462,13 @@ $$
 e^{\hat\xi\theta} = \begin{bmatrix}R & (I - R)q + h\theta\omega\cr 0&1\end{bmatrix}
 $$
 
-> **T/F ★★★:** "The general formula $e^{\hat\xi\theta} = \begin{bmatrix}e^{\hat\omega\theta}&(I-e^{\hat\omega\theta})(\omega\times v)+\omega\omega^Tv\theta\cr 0&1\end{bmatrix}$ works for any twist, including pure translation." **False.** Set $\omega = 0$ and the top‑right entry is $0$, but the correct answer is $v\theta$. The formula also assumed $\Vert\omega\Vert= 1$. Translation needs its own case.
+> **T/F ★★★:** "The general formula
+>
+> $$
+> e^{\hat\xi\theta} = \begin{bmatrix}e^{\hat\omega\theta}&(I-e^{\hat\omega\theta})(\omega\times v)+\omega\omega^Tv\theta\cr 0&1\end{bmatrix}
+> $$
+>
+> works for any twist, including pure translation." **False.** Set $\omega = 0$ and the top‑right entry is $0$, but the correct answer is $v\theta$. The formula also assumed $\Vert\omega\Vert= 1$. Translation needs its own case.
 
 > **Worked example (L10, SCARA joint 2).** $\omega = z$, $q = (0, l_1, 0)$:
 >
